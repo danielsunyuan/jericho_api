@@ -7,7 +7,7 @@ on:
     paths:
       - "jericho/**"
       - "compose.yml"
-      - ".github/workflows/jericho-ci.yml"
+      - ".github/workflows/ci.yml"
   pull_request:
     paths:
       - "jericho/**"
