@@ -1,6 +1,6 @@
 name: Jericho API CI
 description: |
-  Runs build and smoke tests on Docker and native environments (Linux, macOS, Windows)
+  Runs build and smoke tests on Docker and native environments (Linux, macOS (Intel & ARM), Windows)
 
 on:
   push:
@@ -62,21 +62,22 @@ jobs:
     name: Native Build Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, macos-14-arm64, windows-latest]
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install system compilers on Linux
-        if: runner.os == 'Linux'
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake
 
       - name: Install compilers on macOS
-        if: runner.os == 'macOS'
+        if: startsWith(matrix.os, 'macos')
         run: |
           brew install gcc make cmake || true
 
@@ -100,4 +101,4 @@ jobs:
         run: |
           conda activate jericho
           python -c "import jericho; print('[OK] Jericho imported')"
-          continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
