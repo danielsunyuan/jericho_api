@@ -92,7 +92,7 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install --upgrade pip
-          pip install .
+          pip install -r requirements.txt
 
       - name: Smoke test
         shell: bash -l {0}
