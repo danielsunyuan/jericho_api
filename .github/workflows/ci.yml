@@ -89,7 +89,6 @@ jobs:
           auto-update-conda: true
 
       - name: Install dependencies
-      - name: Install dependencies
         shell: bash -l {0}
         run: |
           pip install --upgrade pip
