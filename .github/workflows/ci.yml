@@ -1,0 +1,103 @@
+name: Jericho API CI
+description: |
+  Runs build and smoke tests on Docker and native environments (Linux, macOS, Windows)
+
+on:
+  push:
+    paths:
+      - "jericho/**"
+      - "compose.yml"
+      - ".github/workflows/jericho-ci.yml"
+  pull_request:
+    paths:
+      - "jericho/**"
+      - "compose.yml"
+
+jobs:
+  jericho-tests:
+    name: Docker Smoke Tests
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:24.0.9-dind
+        options: >-
+          --privileged
+        env:
+          DOCKER_BUILDKIT: 1
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker CLI
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and start Jericho service
+        run: |
+          docker compose up --build -d jericho
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8000/docs >/dev/null; then
+              echo "Jericho API is up"
+              break
+            fi
+            echo "Waiting for API..."
+            sleep 2
+          done
+
+      - name: Run smoke test
+        run: bash tests/smoke-test.sh
+
+      - name: Run multi-session test
+        run: bash tests/multi-session-test.sh
+
+      - name: Run session inventory test
+        run: bash tests/session-test.sh
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
+
+  native-build-tests:
+    name: Native Build Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install system compilers on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+
+      - name: Install compilers on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew install gcc make cmake || true
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: 3.10
+          auto-activate-base: false
+
+      - name: Create Conda environment and install Jericho
+        shell: bash -l {0}
+        run: |
+          conda create -n jericho python=3.10 -y
+          conda activate jericho
+          pip install --upgrade pip
+          pip install .
+
+      - name: Smoke test
+        shell: bash -l {0}
+        run: |
+          conda activate jericho
+          python -c "import jericho; print('[OK] Jericho imported')"
+          continue-on-error: ${{ matrix.os == 'windows-latest' }}

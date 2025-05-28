@@ -26,6 +26,15 @@ jericho/
 
 ## 🚀 Quick Start (dev)
 
+## Dependency
+```
+# Create conda environment
+conda create -n jericho python=3.10
+conda activate jericho
+
+# Install from pip (this repo or fork)
+pip install git+https://github.com/danielsunyuan/jericho-api.git
+```
 ```bash
 # from repo root
 docker compose up --build jericho
@@ -113,3 +122,7 @@ A workflow (`.github/workflows/jericho-ci.yml`) builds the image, launches the s
 * **Interactive docs:** Swagger UI available at [`/docs`](http://localhost:8000/docs).
 
 Happy adventuring! 🔑
+
+# Jericho API
+
+![CI](https://github.com/danielsunyuan/jericho-api/actions/workflows/ci.yml/badge.svg)
