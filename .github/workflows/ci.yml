@@ -45,8 +45,8 @@ jobs:
             sleep 2
           done
 
-      - name: Run smoke test
-        run: bash tests/smoke-test.sh
+      - name: Run API smoke test
+        run: bash tests/zork-test.sh
 
       - name: Run multi-session test
         run: bash tests/multi-session-test.sh
@@ -91,11 +91,14 @@ jobs:
       - name: Install dependencies
         shell: bash -l {0}
         run: |
-          pip install --upgrade pip
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            python -m pip install --upgrade pip
+          else
+            pip install --upgrade pip
+          fi
           pip install -r requirements.txt
 
-      - name: Smoke test
+      - name: Python smoke test
         shell: bash -l {0}
-        run: |
-          python -c "import jericho; print('[OK] Jericho imported')"
+        run: bash tests/zork-test.sh
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
