@@ -67,10 +67,10 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-14-arm64, windows-latest]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install compilers on Linux
+      - name: Install system compilers on Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
@@ -85,13 +85,10 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: 3.10
-          environment-file: environment.yml  # make sure this exists at repo root
-          activate-environment: jericho
-          auto-activate-base: false
           auto-update-conda: true
-          use-mamba: true
+          auto-activate-base: false
 
-      - name: Install project
+      - name: Install dependencies
         shell: bash -l {0}
         run: |
           pip install --upgrade pip
