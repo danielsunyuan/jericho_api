@@ -85,20 +85,17 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: 3.10
-          auto-update-conda: true
+          environment-name: jericho
           auto-activate-base: false
 
-      - name: Create Conda environment and install Jericho
+      - name: Install dependencies
         shell: bash -l {0}
         run: |
-          conda create -n jericho python=3.10 -y
-          conda activate jericho
           pip install --upgrade pip
           pip install .
 
       - name: Smoke test
         shell: bash -l {0}
         run: |
-          conda activate jericho
           python -c "import jericho; print('[OK] Jericho imported')"
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
